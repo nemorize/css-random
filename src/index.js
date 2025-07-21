@@ -9,12 +9,16 @@ export default {
 	async fetch(request) {
 		try {
 			const url = new URL(request.url)
-			let identifier = url.pathname.substring(1) || 'random'
-			if (!/^[a-zA-Z0-9-_]+$/.test(identifier)) {
-				throw new Error('identifier must be a valid CSS variable name')
+			const identifiers = (url.pathname.substring(1) || 'random')
+				.split(',')
+				.map((v) => v.trim())
+			for (const identifier of identifiers) {
+				if (!/^[a-zA-Z0-9-_]+$/.test(identifier)) {
+					throw new Error('identifier must be a valid CSS variable name')
+				}
 			}
 			return new Response(
-				`:root{--${identifier}: ${Math.random().toFixed(4)};}`,
+				':root{' + identifiers.map((v) => `--${v}:${Math.random().toFixed(4)};`).join('') + '}',
 				{ headers }
 			)
 		} catch (e) {
